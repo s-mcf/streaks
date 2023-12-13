@@ -3,14 +3,16 @@ import StreakGrid from './StreakGrid';
 import StreakButton from './StreakButton';
 import './App.css';
 import StreakStatus from './StreakStatus';
+import PointsDisplay from './PointsDisplay';
 
 const API_URL = "http://localhost:3000";
 
 const App: React.FC = () => {
   const [isClicked, setIsClicked] = useState(false);
+  const [isLive, setIsLive] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
-  const [lastStreak, setLastStreak] = useState(0);
   const [longestStreak, setLongestStreak] = useState(0);
+  const [points, setPoints] = useState(0);
 
   useEffect(() => {
     fetchStreakInfo();
@@ -26,8 +28,9 @@ const App: React.FC = () => {
       const data = await response.json();
       setIsClicked(data.isCurrent);
       setCurrentStreak(data.currentStreak);
-      setLastStreak(data.lastStreak);
+      setIsLive(data.isLive);
       setLongestStreak(data.longestStreak);
+      setPoints(data.points);
     } catch (error) {
       console.error('Failed to fetch streak information:', error);
     }
@@ -48,22 +51,27 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="p-4 md:p-6">
-        <StreakButton
-          isClicked={isClicked}
-          onClick={handleButtonClick}
-        />
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      <div className="flex justify-end p-4 md:p-6 bg-gray-200">
+        <PointsDisplay points={points} />
       </div>
-      <div className="p-4 md:p-6">
-        <StreakGrid currentStreak={currentStreak} />
-      </div>
-      <div className="p-4 md:p-6">
-        <StreakStatus
-          currentStreak={currentStreak}
-          lastStreak={lastStreak}
-          longestStreak={longestStreak}
-        />
+      <div className="flex-grow flex flex-col items-center justify-center">
+        <div className="p-4 md:p-6">
+          <StreakButton
+            isClicked={isClicked}
+            onClick={handleButtonClick}
+          />
+        </div>
+        <div className="p-4 md:p-6">
+          <StreakGrid currentStreak={currentStreak} />
+        </div>
+        <div className="p-4 md:p-6">
+          <StreakStatus
+            currentStreak={currentStreak}
+            longestStreak={longestStreak}
+            isLive={isLive}
+          />
+        </div>
       </div>
     </div>
   );

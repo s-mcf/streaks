@@ -38,77 +38,50 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION getCurrentStreakLength() RETURNS INTEGER AS $$
+CREATE OR REPLACE FUNCTION getMostRecentStreakLength() RETURNS INTEGER AS $$
 DECLARE
-    streak INTEGER := 0; -- Initialize the streak counter
-    last_press DATE; -- Keep track of the date of the last press
-    press_date DATE; -- Variable to iterate over the press dates
+    streak INTEGER := 0;
+    previous_date DATE := NULL;
+    press_date DATE;
+BEGIN
+    -- Loop through all presses in descending order
+    FOR press_date IN SELECT press_time::DATE FROM presses ORDER BY press_time DESC
+    LOOP
+        IF previous_date IS NULL THEN
+            -- This is the first press, start the streak
+            streak := 1;
+        ELSIF previous_date - INTERVAL '1 day' = press_date THEN
+            -- The press is consecutive, increment the streak
+            streak := streak + 1;
+        ELSE
+            -- A gap is found, the streak ends here
+            EXIT;
+        END IF;
+        previous_date := press_date; -- Update the previous press date for the next iteration
+    END LOOP;
+
+    RETURN streak; -- Return the length of the most recent streak
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION hasLiveStreak() RETURNS BOOLEAN AS $$
+DECLARE
+    last_press DATE; -- Date of the last press
 BEGIN
     -- Get the date of the last press
     SELECT press_time::DATE INTO last_press FROM presses ORDER BY press_time DESC LIMIT 1;
 
-    -- If there was no press at all, return 0
+    -- If there is no press, return false
     IF last_press IS NULL THEN
-        RETURN 0;
+        RETURN FALSE;
     END IF;
 
-    -- If the last press is before today, check if the streak is broken
-    IF last_press < CURRENT_DATE THEN
-        -- Check if the last press was yesterday; if not, the streak has ended
-        IF CURRENT_DATE - last_press > 1 THEN
-            RETURN 0; -- The streak is broken
-        ELSE
-            streak := 1; -- Start streak since the last press was yesterday
-        END IF;
+    -- Check if the last press was today or yesterday
+    IF last_press = CURRENT_DATE OR last_press = CURRENT_DATE - INTERVAL '1 day' THEN
+        RETURN TRUE; -- The streak is alive
     ELSE
-        streak := 1; -- The last press is today, so the streak starts
-    END IF;
-
-    -- Iterate over the presses in descending order starting with the day before the last press
-    FOR press_date IN SELECT press_time::DATE FROM presses WHERE press_time::DATE < last_press ORDER BY press_time DESC
-    LOOP
-        -- Check if the press is consecutive with respect to the last press
-        IF last_press - press_date = 1 THEN
-            streak := streak + 1; -- Increment streak as days are consecutive
-        ELSE
-            EXIT; -- Exit the loop as we found a day that breaks the streak
-        END IF;
-        last_press := press_date; -- Set the current press_date as last_press for next iteration
-    END LOOP;
-
-    RETURN streak; -- Return the total streak count
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION getLastStreakLength() RETURNS INTEGER AS $$
-DECLARE
-    streak INTEGER := 0;
-    last_streak INTEGER := 0;
-    previous_date DATE := NULL;
-    press_date DATE;
-BEGIN
-    FOR press_date IN SELECT press_time::DATE FROM presses ORDER BY press_time DESC
-    LOOP
-        IF previous_date IS NULL THEN
-            streak := 1;
-        ELSIF previous_date - INTERVAL '1 day' = press_date THEN
-            streak := streak + 1;
-        ELSE
-            -- When a gap is found and it's the first gap since a streak
-            IF last_streak = 0 AND streak > 1 THEN
-                last_streak := streak;
-            END IF;
-            streak := 1;
-        END IF;
-        previous_date := press_date;
-    END LOOP;
-
-    -- Check if the current date is part of the ongoing streak
-    IF previous_date = CURRENT_DATE - INTERVAL '1 day' THEN
-        RETURN last_streak;
-    ELSE
-        -- If the current date is not part of the streak, then the ongoing streak is actually the last streak
-        RETURN streak;
+        RETURN FALSE; -- The streak is dead
     END IF;
 END;
 $$ LANGUAGE plpgsql;

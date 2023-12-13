@@ -1,24 +1,15 @@
-import React, { useEffect, useState } from 'react';
-
 type StreakStatusProps = {
     currentStreak: number;
-    lastStreak: number;
+    isLive: boolean;
     longestStreak: number;
 };
 
-const StreakStatus: React.FC<StreakStatusProps> = ({ currentStreak, lastStreak, longestStreak }) => {
-    const [animatedValue, setAnimatedValue] = useState({ currentStreak, lastStreak, longestStreak });
-
-    useEffect(() => {
-        // Trigger the roll-in animation by updating state
-        setAnimatedValue({ currentStreak, lastStreak, longestStreak });
-    }, [currentStreak, lastStreak, longestStreak]);
-
+const StreakStatus: React.FC<StreakStatusProps> = ({ currentStreak, isLive, longestStreak }) => {
     return (
         <div className="flex justify-around my-4 space-x-4 md:space-x-8">
-            <StreakNumber title="Current Streak" value={animatedValue.currentStreak} />
-            <StreakNumber title="Last Streak" value={animatedValue.lastStreak} />
-            <StreakNumber title="Longest Streak" value={animatedValue.longestStreak} />
+            <StreakNumber title="Current Streak" value={isLive ? currentStreak : 0} />
+            {!isLive && currentStreak > 0 && <StreakNumber title="Your Last Streak :(" value={currentStreak} />}
+            <StreakNumber title="Longest Streak" value={longestStreak} />
         </div>
     );
 };

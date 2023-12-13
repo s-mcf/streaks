@@ -35,10 +35,10 @@ app.post('/press', async (req, res) => {
 // The current status query is returned in this format
 type StreakInfo = {
     current_streak: number;
-    last_streak: number;
     longest_streak: number;
     points: number;
     is_current: boolean;
+    has_live_streak: boolean;
 };
 
 app.get('/info', async (req, res) => {
@@ -46,11 +46,10 @@ app.get('/info', async (req, res) => {
         const client = await pool.connect();
 
         // Combined call to all stored procedures
-        // TODO add is_current
         const combinedResult = await client.query<StreakInfo>(`
-            SELECT getCurrentStreakLength() AS current_streak,
-                   getLastStreakLength() AS last_streak,
+            SELECT getMostRecentStreakLength() AS current_streak,
                    getLongestStreakLength() AS longest_streak,
+                   hasLiveStreak() AS has_live_streak,
                    calculateTotalPoints() AS points,
                    EXISTS (
                     SELECT 1 FROM presses
@@ -66,10 +65,10 @@ app.get('/info', async (req, res) => {
         // Send response
         res.status(200).json({
             currentStreak: result.current_streak,
-            lastStreak: result.last_streak,
             longestStreak: result.longest_streak,
             points: result.points,
             isCurrent: result.is_current,
+            isLive: result.has_live_streak,
         });
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error });
