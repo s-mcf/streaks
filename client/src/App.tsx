@@ -24,7 +24,7 @@ const App: React.FC = () => {
         throw new Error('Network response was not ok');
       }
       const data = await response.json();
-      setIsClicked(data.currentStreak > 0);
+      setIsClicked(data.isCurrent);
       setCurrentStreak(data.currentStreak);
       setLastStreak(data.lastStreak);
       setLongestStreak(data.longestStreak);
