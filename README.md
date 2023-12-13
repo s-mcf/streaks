@@ -10,6 +10,9 @@ Streaks is a simple web app, inspired by Duolingo’s streaks system. The featur
 - The system will operate in the America/Los_Angeles time zone, resetting the day at midnight in this zone.
 - In this version, for simplicity the app will only track a single streak from a single user.
 
+## Running the app
+
+Create a PostgreSQL database called `streaks` under your user. Then load the schema and stored procedures with `psql -d streaks -f server/schema.sql`. Then you can run the backend with `cd server; npm start` and the frontend with `cd client; npm start`.
 
 ## Design decisions
 
