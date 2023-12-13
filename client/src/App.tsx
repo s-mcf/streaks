@@ -43,12 +43,16 @@ const App: React.FC = () => {
   };
 
   return (
-    <div>
-      <StreakButton
-        isClicked={isClicked}
-        onClick={handleButtonClick}
-      />
-      <StreakGrid currentStreak={currentStreak} />
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="p-4 md:p-6">
+        <StreakButton
+          isClicked={isClicked}
+          onClick={handleButtonClick}
+        />
+      </div>
+      <div className="p-4 md:p-6">
+        <StreakGrid currentStreak={currentStreak} />
+      </div>
     </div>
   );
 };
