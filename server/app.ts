@@ -2,12 +2,14 @@ import express from 'express';
 import { Pool } from 'pg';
 
 const app = express();
+const cors = require('cors');
 const port = 3000;
 const pool = new Pool({
     database: 'streaks'
 });
 
 app.use(express.json());
+app.use(cors());
 
 app.post('/press', async (req, res) => {
     try {
