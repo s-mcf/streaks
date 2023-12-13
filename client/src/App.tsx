@@ -8,10 +8,15 @@ import PointsDisplay from './PointsDisplay';
 const API_URL = "http://localhost:3000";
 
 const App: React.FC = () => {
+  // Have we clicked the button today?
   const [isClicked, setIsClicked] = useState(false);
+  // Do we currently have a streak?
   const [isLive, setIsLive] = useState(false);
+  // How long is our most recent streak?
   const [currentStreak, setCurrentStreak] = useState(0);
+  // Length of our longest ever streak
   const [longestStreak, setLongestStreak] = useState(0);
+  // Coins we have
   const [points, setPoints] = useState(0);
 
   useEffect(() => {
@@ -40,8 +45,8 @@ const App: React.FC = () => {
     try {
       const response = await fetch(`${API_URL}/press`, { method: 'POST' });
       if (response.ok) {
-        fetchStreakInfo();
         setIsClicked(true);
+        fetchStreakInfo();
       } else {
         console.error('Failed to record the button press');
       }
