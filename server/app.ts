@@ -37,6 +37,7 @@ type StreakInfo = {
     current_streak: number;
     last_streak: number;
     longest_streak: number;
+    points: number;
     is_current: boolean;
 };
 
@@ -50,6 +51,7 @@ app.get('/info', async (req, res) => {
             SELECT getCurrentStreakLength() AS current_streak,
                    getLastStreakLength() AS last_streak,
                    getLongestStreakLength() AS longest_streak,
+                   calculateTotalPoints() AS points,
                    EXISTS (
                     SELECT 1 FROM presses
                     WHERE press_time::date = CURRENT_DATE
@@ -66,6 +68,7 @@ app.get('/info', async (req, res) => {
             currentStreak: result.current_streak,
             lastStreak: result.last_streak,
             longestStreak: result.longest_streak,
+            points: result.points,
             isCurrent: result.is_current,
         });
     } catch (error) {
