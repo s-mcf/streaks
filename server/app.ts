@@ -30,6 +30,41 @@ app.post('/press', async (req, res) => {
     }
 });
 
+// The current status query is returned in this format
+type StreakInfo = {
+    current_streak: number;
+    last_streak: number;
+    longest_streak: number;
+};
+
+app.get('/info', async (req, res) => {
+    try {
+        const client = await pool.connect();
+
+        // Combined call to all stored procedures
+        const combinedResult = await client.query<StreakInfo>(`
+            SELECT getCurrentStreakLength() AS current_streak,
+                   getLastStreakLength() AS last_streak,
+                   getLongestStreakLength() AS longest_streak;
+        `);
+
+        // Extract values from the combined result
+        const result = combinedResult.rows[0];
+
+        client.release();
+
+        // Send response
+        res.status(200).json({
+            currentStreak: result.current_streak,
+            lastStreak: result.last_streak,
+            longestStreak: result.longest_streak
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error });
+    }
+});
+
+
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
