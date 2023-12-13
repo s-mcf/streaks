@@ -15,7 +15,7 @@ const StreakStatus: React.FC<StreakStatusProps> = ({ currentStreak, lastStreak, 
     }, [currentStreak, lastStreak, longestStreak]);
 
     return (
-        <div className="flex justify-around my-4">
+        <div className="flex justify-around my-4 space-x-4 md:space-x-8">
             <StreakNumber title="Current Streak" value={animatedValue.currentStreak} />
             <StreakNumber title="Last Streak" value={animatedValue.lastStreak} />
             <StreakNumber title="Longest Streak" value={animatedValue.longestStreak} />
